@@ -15,8 +15,8 @@ from {module} import Entry
 feat.execute_featurization_job(Entry)
 '''
 
-DOCKERFILE_TEMPLATE = '''FROM python:3.7
-
+DOCKERFILE_TEMPLATE = '''FROM python:3.8
+RUN pip install --upgrade pip
 {install_libraries}
 
 COPY . /featurization
