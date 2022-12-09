@@ -54,7 +54,8 @@ class PlainExractorBuilder:
               transformer: Optional = None,
               take_columns: Union[str, List[str], None] = None,
               raise_if_rows_are_missing: bool = True,
-              raise_if_nulls_detected: bool = True
+              raise_if_nulls_detected: bool = True,
+              coalesce_nulls: Optional = None
               ) -> 'PlainExtractor':
         if len(self.joins) == 0:
             self.joins.append(_JoinDescription(None, _JoinType.NullIndex))
@@ -64,7 +65,8 @@ class PlainExractorBuilder:
             self.joins,
             transformer,
             raise_if_rows_are_missing,
-            raise_if_nulls_detected
+            raise_if_nulls_detected,
+            coalesce_nulls
         )
 
 
@@ -74,13 +76,15 @@ class PlainExtractor(Extractor):
                  joins: List[_JoinDescription],
                  transformer: Optional,
                  raise_if_rows_are_missing: bool,
-                 raise_if_nulls_detected: bool
+                 raise_if_nulls_detected: bool,
+                 coalesce_nulls: Optional = None
                  ):
         self.name = name
         self.joins = joins
         self.transformer = copy.deepcopy(transformer)
         self.raise_if_rows_are_missing = raise_if_rows_are_missing
         self.raise_if_nulls_detected = raise_if_nulls_detected
+        self.coalesce_nulls = coalesce_nulls
 
     @staticmethod
     def build(name: str):
@@ -117,7 +121,6 @@ class PlainExtractor(Extractor):
 
             join_columns = self.joins[join_index - 1].keep_columns
             current = current.merge(frame, left_on=join_columns, right_index=True, how=how).drop(join_columns, axis=1)
-
             if current.shape[0] < ibundle.index_frame.shape[0]:
                 raise ValueError(f'Error in extractor {self.name}: when merging with {join.frame}, less rows are produced, {current.shape[0]} instead {ibundle.index_frame.shape[0]}. Are some rows missing?')
             elif current.shape[0] > ibundle.index_frame.shape[0]:
@@ -126,7 +129,6 @@ class PlainExtractor(Extractor):
                 current = current.loc[ibundle.index_frame.index]
                 if not (current.index == ibundle.index_frame.index).all():
                     raise ValueError(f'Error in extractor {self.name}: something wrong happened when merging with {join.frame}: same amount of rows, but indices are different')
-
         return current
 
     def fit(self, ibundle: IndexedDataBundle):
@@ -143,6 +145,8 @@ class PlainExtractor(Extractor):
                 null_columns = frame.isnull().any(axis=0)
                 null_columns = list(null_columns.loc[null_columns].index)
                 raise ValueError(f'Error in extractor {self.name}: nulls are detected in the output in columns\n{null_columns}')
+        elif self.coalesce_nulls:
+            frame = frame.fillna(value = self.coalesce_nulls)
         return frame
 
     def get_name(self):
