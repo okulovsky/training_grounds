@@ -1,6 +1,7 @@
 from .. import factories as btf
 from .lstm_components import  LSTMNetwork
 from .alon_attention import AlonAttention
+from .self_attention import AttentionReccurentNetwork
 import torch
 from functools import partial
 from enum import Enum
@@ -9,6 +10,7 @@ class Dim3NetworkType:
     LSTM = 0
     AlonAttention = 1
     AlonAttentionWithoutFullyConnected = 2
+    SelfAttentionAndLSTM = 3
 
 class Dim3NetworkFactory:
     def __init__(self, input_name: str):
@@ -28,6 +30,8 @@ class Dim3NetworkFactory:
             factories.append(partial(AlonAttention, hidden_size = hidden_size))
         elif self.network_type == Dim3NetworkType.AlonAttentionWithoutFullyConnected:
             factories.append(partial(AlonAttention, hidden_size = None))
+        elif self.network_type == Dim3NetworkType.SelfAttentionAndLSTM:
+            factories.append(partial(AttentionReccurentNetwork, hidden_size = hidden_size))
 
         pipeline = btf.FeedForwardNetwork.Factory(*factories)
         return pipeline(input)
