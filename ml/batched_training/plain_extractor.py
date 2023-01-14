@@ -148,7 +148,7 @@ class PlainExtractor(Extractor):
                 null_columns = frame.isnull().any(axis=0)
                 null_columns = list(null_columns.loc[null_columns].index)
                 raise ValueError(f'Error in extractor {self.name}: nulls are detected in the output in columns\n{null_columns}')
-        elif self.coalesce_nulls:
+        elif self.coalesce_nulls is not None:
             frame = frame.fillna(value = self.coalesce_nulls)
         return frame
 
