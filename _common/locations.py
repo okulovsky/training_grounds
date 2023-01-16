@@ -36,8 +36,9 @@ class LocationsClass:
         import_path = type(self).__module__
         suffix = '.common._common.locations'
         if not import_path.endswith(suffix):
-            raise ValueError('Seems like the file structure of TG has been change. Update the suffix variable in the prev. line to make everything correct')
-        self.tg_import_path = import_path.replace(suffix,'')
+            self.tg_common_path = None
+        else:
+            self.tg_import_path = import_path.replace(suffix,'')
 
     def get_default_temp_path(self, prefix: str, location: Optional[Union[str, Path]] = None) -> Path:
         if location is None:
