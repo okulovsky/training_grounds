@@ -53,7 +53,11 @@ class Extractor:
                 rs = extractor.extract(ibundle)
             except Exception as e:
                 raise ValueError(f'Error when extracting from extractor `{extractor.get_name()}`') from e
-            result[extractor.get_name()] = rs
+            if isinstance(rs,dict):
+                for key, value in rs.items():
+                    result[key] = value
+            else:
+                result[extractor.get_name()] = rs
         return IndexedDataBundle(ibundle.index_frame, result)
 
 
