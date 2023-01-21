@@ -45,7 +45,7 @@ class ContextualAssemblyPoint(btf.AssemblyPoint):
             if isinstance(size, int):
                 size = [size]
             return partial(self.pivot_network_factory.create_network, hidden_size = size)
-        elif self.reduction_type == ReductionType.Dim3:
+        elif self.reduction_type == ReductionType.Dim3 or self.reduction_type == ReductionType.Dim3Folded:
             size = self.hidden_size
             if not isinstance(size, int):
                 if len(size)==1:
