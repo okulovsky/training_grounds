@@ -55,7 +55,8 @@ class PlainExractorBuilder:
               take_columns: Union[str, List[str], None] = None,
               raise_if_rows_are_missing: bool = True,
               raise_if_nulls_detected: bool = True,
-              coalesce_nulls: Optional = None
+              coalesce_nulls: Optional = None,
+              drop_columns: Union[str, List[str], None] = None
               ) -> 'PlainExtractor':
         if len(self.joins) == 0:
             self.joins.append(_JoinDescription(None, _JoinType.NullIndex))
@@ -66,7 +67,8 @@ class PlainExractorBuilder:
             transformer,
             raise_if_rows_are_missing,
             raise_if_nulls_detected,
-            coalesce_nulls
+            coalesce_nulls,
+            drop_columns
         )
 
 
@@ -77,7 +79,8 @@ class PlainExtractor(Extractor):
                  transformer: Optional,
                  raise_if_rows_are_missing: bool,
                  raise_if_nulls_detected: bool,
-                 coalesce_nulls: Optional = None
+                 coalesce_nulls: Optional = None,
+                 drop_columns: Optional = None
                  ):
         self.name = name
         self.joins = joins
@@ -85,6 +88,7 @@ class PlainExtractor(Extractor):
         self.raise_if_rows_are_missing = raise_if_rows_are_missing
         self.raise_if_nulls_detected = raise_if_nulls_detected
         self.coalesce_nulls = coalesce_nulls
+        self.drop_columns = drop_columns
 
     @staticmethod
     def build(name: str):
@@ -132,6 +136,8 @@ class PlainExtractor(Extractor):
                 current = current.loc[ibundle.index_frame.index]
                 if not (current.index == ibundle.index_frame.index).all():
                     raise ValueError(f'Error in extractor {self.name}: something wrong happened when merging with {join.frame}: same amount of rows, but indices are different')
+        if self.drop_columns is not None:
+            current = current.drop(self.drop_columns, axis=1)
         return current
 
     def fit(self, ibundle: IndexedDataBundle):
