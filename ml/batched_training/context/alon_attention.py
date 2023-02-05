@@ -1,5 +1,6 @@
 import torch
 from .. import factories as btf
+from functools import partial
 
 # Attention following:
 # Uri Alon, Meital Zilberstein, Omer Levy, Eran Yahav, code2vec: Learning Distributed Representations of Code
@@ -15,7 +16,7 @@ class AlonAttention(torch.nn.Module):
             self.hidden_network = None
 
         hidden_tensor = self._fully_connected_step(sample)
-        self.attention_network = btf.Perceptron(hidden_tensor, 1)
+        self.attention_network = btf.Perceptron(hidden_tensor, 1, function=partial(torch.softmax,dim=1))
 
 
 
@@ -29,5 +30,5 @@ class AlonAttention(torch.nn.Module):
         hidden = self._fully_connected_step(inp)
         weights = self.attention_network(hidden)
         weighted_tensor = torch.mul(hidden, weights)
-        result = torch.mean(weighted_tensor, dim=[0])
+        result = torch.sum(weighted_tensor, dim=[0])
         return result
