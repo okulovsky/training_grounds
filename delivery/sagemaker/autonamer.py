@@ -42,7 +42,7 @@ class Autonamer:
                 elif isinstance(value, float):
                     v = str(value).replace('.', '')
                 elif isinstance(value, Enum):
-                    v = value.name
+                    v = ''.join([c for c in value.name if c.isupper() or c.isdigit()])
                 else:
                     v = str(value)
                 parts.append(prefix + v)

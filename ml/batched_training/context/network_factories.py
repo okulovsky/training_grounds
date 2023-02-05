@@ -6,7 +6,7 @@ import torch
 from functools import partial
 from enum import Enum
 
-class Dim3NetworkType:
+class Dim3NetworkType(Enum):
     LSTM = 0
     AlonAttention = 1
     AlonAttentionWithoutFullyConnected = 2
