@@ -53,15 +53,18 @@ class S3TrainingLogsLoader:
             dfs.append(df)
         return pd.concat(dfs)
 
-    def load_and_cache_metrics(self, job_ids, progress_bar = False, ignore_errors = False, cache_mode = 'default'):
-        code = '/'.join([c for job in job_ids for c in job])
-        name = hashlib.md5(code.encode('utf-8')).hexdigest()
-        cache_name = 'sagemaker-' + name
-        return CacheMode.apply_to_file(
+    def load_and_cache_metrics(self, job_ids, progress_bar = False, ignore_errors = False, cache_mode = 'default', cache_path = None):
+        if cache_path is None:
+            code = '/'.join([c for job in job_ids for c in job])
+            name = hashlib.md5(code.encode('utf-8')).hexdigest()
+            cache_name = 'sagemaker-' + name+'.parquet'
+            cache_path = Loc.data_cache_path / cache_name
+        return CacheMode.from_parquet_file().get(
+            cache_path,
+            lambda: self.load_metrics(job_ids, progress_bar, ignore_errors),
             cache_mode,
-            Loc.data_cache_path/cache_name,
-            lambda: self.load_metrics(job_ids, progress_bar, ignore_errors)
         )
+
 
 
 

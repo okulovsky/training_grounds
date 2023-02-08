@@ -4,8 +4,9 @@ import pandas as pd
 
 
 class Perceptron(torch.nn.Module):
-    def __init__(self, input_size: Union[torch.Tensor, int], output_size: int):
+    def __init__(self, input_size: Union[torch.Tensor, int], output_size: int, function = torch.sigmoid):
         super(Perceptron, self).__init__()
+        self.function = function
         if output_size is not None:
             i_size = Perceptron.tensor_argument_to_int(input_size)
             o_size = Perceptron.tensor_argument_to_int(output_size)
@@ -15,7 +16,7 @@ class Perceptron(torch.nn.Module):
 
     def forward(self, input):
         if self.linear_layer is not None:
-            return torch.sigmoid(self.linear_layer(input))
+            return self.function(self.linear_layer(input))
         else:
             return input
 
